@@ -3,6 +3,8 @@ import Ajv from 'ajv';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
+import { JSONResponse, ResponseStatus } from '../../ts/types';
+
 import user from '../../database/models/user';
 
 const ajv = new Ajv({ allErrors: true });
@@ -35,32 +37,37 @@ const schema = {
 
 const validate = ajv.compile(schema);
 
-const handler = async (req: Request, res: Response) => {
-    const body = req.body
+const handler = async (req: Request, res: Response): Promise<any> => {
+    const body = req.body;
     if(validate(body)){
         if(body.password === body.passwordConfirm){
             // Mongo has no way besides parsing error string, this is best alternative to checking for duplicates. Cost is OK because it is register route
             let dupSearch = await user.findOne({ username: body.username });
-            if(dupSearch) return res.json({ status: 'error', error: 'Username in use' });
+            if(dupSearch){
+                return res.json({ status: ResponseStatus.error, data: 'username in use' } as JSONResponse);
+            }
             dupSearch = await user.findOne({ email: body.email });
-            if(dupSearch) return res.json({ status: 'error', error: 'Email in use' });
+            if(dupSearch){
+                return res.json({ status: ResponseStatus.error, data: 'email in use' } as JSONResponse);
+            }
 
+            // Generate password and user model
             const salt = await bcrypt.genSalt(Number(process.env.BCRYPT_SALT_ROUNDS));
             const hashedPw = await bcrypt.hash(body.password, salt);
             const newUser = new user({username: body.username, password: hashedPw, fname: body.fname, lname: body.lname, email: body.email});
-            newUser.save((err) => {
-                if(err){
-                    console.error('An error happened in user creation: ', err);
-                    return res.json({ error: 'An error occurred during record creation' });
-                }
-            });
+            try{
+                await newUser.save();
+            }catch(e){
+                console.error('An error happened in user creation: ', e);
+                return res.json({ status: ResponseStatus.error, data: 'an error occurred during record creation' } as JSONResponse);
+            }
             const token = jwt.sign({ username: body.username }, process.env.JWT_SECRET, { algorithm: 'HS256' });
-            res.json({ status: 'success', token });
+            return res.json({ status: ResponseStatus.success, data: token } as JSONResponse);
         }else{
-            res.json({ status: 'error', error: 'Passwords do not match' });
+            return res.json({ status: ResponseStatus.error, data: 'passwords do not match' } as JSONResponse);
         }
     }else{
-        res.send(validate.errors);
+        return res.send(validate.errors);
     }
 };
 

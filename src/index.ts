@@ -26,7 +26,7 @@ app.use(bodyParser.json());
 app.use('/', router);
 
 router.all('*', (req, res) => {
-    res.status(404).send('Could not find route');
+    res.status(404).send('Route not found');
 });
 
 app.listen(3000, () => {

@@ -9,6 +9,17 @@ import user from '../../database/models/user';
 
 const ajv = new Ajv({ allErrors: true });
 
+/**
+ * /auth/register
+ * Handles registration of new accounts
+ * @param {string} username - user's username
+ * @param {string} password - user's password
+ * @param {string} passwordConfirm - user's password confirmation
+ * @param {string} fname - user's first name
+ * @param {string} lname - user's last name
+ * @param {string} email - user's email
+ */
+
 const schema = {
     type: 'object',
     properties: {

@@ -9,6 +9,12 @@ import user from '../../../database/models/user';
 
 const ajv = new Ajv({ allErrors: true });
 
+/**
+ * /api/competitions/create
+ * Handles creation of new competitions
+ * @param {string} name - name of new competition
+ */
+
 const schema = {
     type: 'object',
     properties: {

@@ -44,7 +44,7 @@ const handler = async (req: Request, res: Response): Promise<any> => {
         // Add competition to creator
         const ownerCompetitions = await user.findOne({ username: req.auth.username });
         try{
-            await ownerCompetitions.competitions.push(compId);
+            await ownerCompetitions.ownedCompetitions.push(compId);
             await ownerCompetitions.save();
         }catch(e){
             console.error('An error occurred while adding the competition to the owner: ', e);

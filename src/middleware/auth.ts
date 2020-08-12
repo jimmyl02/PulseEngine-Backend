@@ -3,6 +3,11 @@ import jwt from 'jsonwebtoken';
 
 import { JSONResponse, ResponseStatus, AuthData } from '../ts/types';
 
+/**
+ * userAuthRequired
+ * Middleware used to require authentication on a route, it adds a req.auth with the authentication data
+ */
+
 export const userAuthRequired = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
     if(authHeader === undefined || !authHeader.startsWith('Bearer ')){

@@ -6,6 +6,7 @@ export interface IUser extends Document{
     fname: string;
     lname: string;
     email: string;
+    ownedCompetitions: string[];
     competitions: string[];
 }
 
@@ -15,6 +16,7 @@ const UserSchema: Schema = new Schema({
     fname: { type: String, required: true },
     lname: { type: String, required: true },
     email: { type: String, required: true, unique: true },
+    ownedCompetitions: { type: [String], required: true },
     competitions: { type: [String], required: true }
 });
 

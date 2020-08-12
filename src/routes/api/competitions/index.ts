@@ -5,6 +5,7 @@ import { userAuthRequired } from '../../../middleware/auth';
 import create from './create';
 import adduser from './adduser';
 import info from './info';
+import admininfo from './admininfo';
 import getallscores from './getallscores';
 import getscores from './getscores';
 import update from './update';
@@ -19,6 +20,9 @@ competitionsRouter.route('/adduser')
 
 competitionsRouter.route('/info')
     .post(userAuthRequired, info);
+
+    competitionsRouter.route('/admininfo')
+    .post(userAuthRequired, admininfo);
 
 competitionsRouter.route('/getallscores')
     .post(userAuthRequired, getallscores);

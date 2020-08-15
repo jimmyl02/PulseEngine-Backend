@@ -2,6 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import cors from 'cors';
 
 dotenv.config();
 
@@ -22,6 +23,12 @@ mongoose.connect(process.env.DB_CONNECTION, { useNewUrlParser: true })
 // Setup middleware
 app.use(bodyParser.json());
 
+const corsOptions = {
+    origin: process.env.origin
+};
+
+app.use(cors(corsOptions));
+
 // Setup router
 app.use('/', router);
 
@@ -29,6 +36,6 @@ router.all('*', (req, res) => {
     res.status(404).send('Route not found');
 });
 
-app.listen(3000, () => {
-    console.log('App is listening on port 3000');
+app.listen(8080, () => {
+    console.log('App is listening on port 8080');
 });

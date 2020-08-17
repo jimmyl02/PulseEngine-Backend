@@ -24,7 +24,7 @@ mongoose.connect(process.env.DB_CONNECTION, { useNewUrlParser: true })
 app.use(bodyParser.json());
 
 const corsOptions = {
-    origin: process.env.origin
+    origin: process.env.ORIGIN
 };
 
 app.use(cors(corsOptions));

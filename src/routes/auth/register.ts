@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 
 import { JSONResponse, ResponseStatus } from '../../ts/types';
 
-import user from '../../database/models/user';
+import user, { IUser } from '../../database/models/user';
 
 const ajv = new Ajv({ allErrors: true });
 
@@ -53,7 +53,7 @@ const handler = async (req: Request, res: Response): Promise<any> => {
     if(validate(body)){
         if(body.password === body.passwordConfirm){
             // Mongo has no way besides parsing error string, this is best alternative to checking for duplicates. Cost is OK because it is register route
-            let dupSearch = await user.findOne({ username: body.username });
+            let dupSearch: IUser = await user.findOne({ username: body.username });
             if(dupSearch){
                 return res.json({ status: ResponseStatus.error, data: 'username in use' } as JSONResponse);
             }
@@ -65,7 +65,7 @@ const handler = async (req: Request, res: Response): Promise<any> => {
             // Generate password and user model
             const salt = await bcrypt.genSalt(Number(process.env.BCRYPT_SALT_ROUNDS));
             const hashedPw = await bcrypt.hash(body.password, salt);
-            const newUser = new user({username: body.username, password: hashedPw, fname: body.fname, lname: body.lname, email: body.email});
+            const newUser = new user({username: body.username, password: hashedPw, fname: body.fname, lname: body.lname, email: body.email} as IUser);
             try{
                 await newUser.save();
             }catch(e){

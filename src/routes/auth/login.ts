@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 
 import { JSONResponse, ResponseStatus } from '../../ts/types';
 
-import user from '../../database/models/user';
+import user, { IUser } from '../../database/models/user';
 
 const ajv = new Ajv({ allErrors: true });
 
@@ -34,7 +34,7 @@ const validate = ajv.compile(schema);
 const handler = async (req: Request, res: Response): Promise<any> => {
     const body = req.body;
     if(validate(body)){
-        const authUser = await user.findOne({ username: body.username });
+        const authUser: IUser = await user.findOne({ username: body.username });
         if(authUser){
             const passwordCompare = await bcrypt.compare(body.password, authUser.password);
             if(passwordCompare){

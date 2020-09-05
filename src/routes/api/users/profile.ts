@@ -3,7 +3,7 @@ import Ajv from 'ajv';
 
 import { JSONResponse, ResponseStatus } from '../../../ts/types';
 
-import user from '../../../database/models/user';
+import user, { IUser } from '../../../database/models/user';
 
 const ajv = new Ajv({ allErrors: true });
 
@@ -13,7 +13,7 @@ const ajv = new Ajv({ allErrors: true });
  */
 
 const handler = async (req: Request, res: Response): Promise<any> => {
-    const userObject = await user.findOne({ username: req.auth.username }, '-_id username fname lname email ownedCompetitions competitions');
+    const userObject: IUser = await user.findOne({ username: req.auth.username }, '-_id username fname lname email ownedCompetitions competitions');
     if(!userObject) return res.json({ status: ResponseStatus.error, data: 'the user could not be found' } as JSONResponse);
     return res.json({ status: ResponseStatus.success, data: userObject } as JSONResponse);
 };

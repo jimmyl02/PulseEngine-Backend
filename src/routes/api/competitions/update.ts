@@ -3,8 +3,8 @@ import Ajv from 'ajv';
 
 import { JSONResponse, ResponseStatus } from '../../../ts/types';
 
-import competition from '../../../database/models/competition';
-import score from '../../../database/models/score';
+import competition, { ICompetition } from '../../../database/models/competition';
+import score, { IScore } from '../../../database/models/score';
 
 const ajv = new Ajv({ allErrors: true });
 
@@ -51,12 +51,12 @@ const handler = async (req: Request, res: Response): Promise<any> => {
     const body = req.body;
     if(validate(body)){
         // Validate that the competition exists before getting information
-        const competitionObject = await competition.findOne({ comp_id: body.compId });
+        const competitionObject: ICompetition = await competition.findOne({ comp_id: body.compId });
         if(!competitionObject) return res.json({ status: ResponseStatus.error, data: 'the competition id could not be found' } as JSONResponse);
         // Validate that the API key for the competition
         if(competitionObject.apikey === body.apikey){
             // Add new scores to the collection
-            const newScore = new score({ comp_id: body.compId, teamname: body.teamname, services: body.services });
+            const newScore = new score({ comp_id: body.compId, teamname: body.teamname, services: body.services } as IScore);
             try{
                 await newScore.save();
             }catch(e){

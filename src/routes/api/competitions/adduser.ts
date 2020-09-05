@@ -3,8 +3,8 @@ import Ajv from 'ajv';
 
 import { JSONResponse, ResponseStatus } from '../../../ts/types';
 
-import competition from '../../../database/models/competition';
-import user from '../../../database/models/user';
+import competition, { ICompetition } from '../../../database/models/competition';
+import user, { IUser } from '../../../database/models/user';
 
 const ajv = new Ajv({ allErrors: true });
 
@@ -33,13 +33,13 @@ const validate = ajv.compile(schema);
 const handler = async (req: Request, res: Response): Promise<any> => {
     const body = req.body;
     if(validate(body)){
-        const competitionToModify = await competition.findOne({ comp_id: body.compId });
+        const competitionToModify: ICompetition = await competition.findOne({ comp_id: body.compId });
         // Validate that the comptition exists before adding
         if(!competitionToModify) return res.json({ status: ResponseStatus.error, data: 'the competition id could not be found' } as JSONResponse);
         // Validate that user is owner of the competition before adding
         if(competitionToModify.owner === req.auth.username){
             // Validate that the user being added actually exists
-            const userToAdd = await user.findOne({ username: body.username });
+            const userToAdd: IUser = await user.findOne({ username: body.username });
             if(userToAdd){
                 // User to be added actually exists and there are correct permissions so make the changes
                 // Validate that the user is not already in the competition

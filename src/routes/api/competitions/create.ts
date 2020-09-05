@@ -4,8 +4,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { JSONResponse, ResponseStatus } from '../../../ts/types';
 
-import competition from '../../../database/models/competition';
-import user from '../../../database/models/user';
+import competition, { ICompetition } from '../../../database/models/competition';
+import user, { IUser } from '../../../database/models/user';
 
 const ajv = new Ajv({ allErrors: true });
 
@@ -34,7 +34,7 @@ const handler = async (req: Request, res: Response): Promise<any> => {
         const apikey = uuidv4();
         // Generate new UUIDs and save it as new competition
         try{
-            const newCompetition = new competition({ comp_id: compId, name: body.name, owner: req.auth.username, apikey, users: [req.auth.username] });
+            const newCompetition = new competition({ comp_id: compId, name: body.name, owner: req.auth.username, apikey, users: [req.auth.username] } as ICompetition);
             await newCompetition.save();
         }catch(e){
             console.error('An error occurred in competition creation: ', e);
@@ -42,7 +42,7 @@ const handler = async (req: Request, res: Response): Promise<any> => {
         }
 
         // Add competition to creator
-        const ownerCompetitions = await user.findOne({ username: req.auth.username });
+        const ownerCompetitions: IUser = await user.findOne({ username: req.auth.username });
         try{
             await ownerCompetitions.ownedCompetitions.push(compId);
             await ownerCompetitions.save();

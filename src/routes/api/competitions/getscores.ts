@@ -43,7 +43,7 @@ const handler = async (req: Request, res: Response): Promise<any> => {
             const scoreRecords = await score.find({ comp_id: body.compId }, null, { sort: { createdAt: 'desc' } });
 
             // Process the records to have useful data; TODO: Offload this to an information calc worker and implement a server-side cache
-            const scores: any = {}; // This has to be any type because number and names of teams is arbitrary
+            const scores: any = {}; // TODO: Type this stronger because it is like a map
 
             for(const scoreRecord of scoreRecords){
                 if(scores[scoreRecord.teamname] === undefined){
@@ -57,16 +57,25 @@ const handler = async (req: Request, res: Response): Promise<any> => {
                         scores[scoreRecord.teamname][serviceStatus.name] = serviceScore;
                     }
                 }else{
-                    // This team has been seen before, only increment checksUp / totalChecks
+                    // This team has been seen before, only increment checksUp / totalChecks and add new services
                     for(const serviceStatus of scoreRecord.services){
-                        scores[scoreRecord.teamname][serviceStatus.name].totalChecks += 1;
-                        if(serviceStatus.status) scores[scoreRecord.teamname][serviceStatus.name].checksUp += 1;
+                        if(scores[scoreRecord.teamname][serviceStatus.name]){
+                            // If a service with the name already exists then update it
+                            scores[scoreRecord.teamname][serviceStatus.name].totalChecks += 1;
+                            if(serviceStatus.status) scores[scoreRecord.teamname][serviceStatus.name].checksUp += 1;
+                        }else{
+                            // New service, create a new service and add it to current status for the team
+                            const serviceScore: DetailedServiceScore = {status: serviceStatus.status,
+                                checksUp: serviceStatus.status ? 1 : 0,
+                                totalChecks: 1  };
+                            scores[scoreRecord.teamname][serviceStatus.name] = serviceScore;
+                        }
                     }
                 }
             }
 
             // All scores have been added to scores object and can now be returned
-            return res.json({ status: ResponseStatus.success, data: scores });
+            return res.json({ status: ResponseStatus.success, data: scores } as JSONResponse);
         }else{
             return res.json({ status: ResponseStatus.error, data: 'authorization failed' } as JSONResponse);
         }
